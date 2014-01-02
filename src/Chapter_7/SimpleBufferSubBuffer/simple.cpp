@@ -58,6 +58,9 @@ int main(int argc, char** argv)
 
     std::cout << "Simple buffer and sub-buffer Example" << std::endl;
 
+    // Parse command line options
+    //
+    int use_gpu = 1;
     for (int i = 1; i < argc; i++)
     {
         std::string input(argv[i]);
@@ -72,12 +75,18 @@ int main(int argc, char** argv)
         {
             useMap = true;
         }
+        else if(strstr(argv[i], "cpu"))
+            use_gpu = 0;        
+        else if(strstr(argv[i], "gpu"))
+            use_gpu = 1;
         else
         {
             std::cout << "usage: --platform n --useMap" << std::endl;
             return 0;
         }
     }
+
+    //printf("Parameter detect %s device\n",use_gpu==1?"GPU":"CPU");
 
 
     // First, select an OpenCL platform to run on.  
@@ -162,7 +171,7 @@ int main(int argc, char** argv)
         program,
         numDevices,
         deviceIDs,
-        "-I.",
+        "",
         NULL,
         NULL);
     if (errNum != CL_SUCCESS) 
@@ -177,8 +186,8 @@ int main(int argc, char** argv)
             buildLog, 
             NULL);
 
-            std::cerr << "Error in OpenCL C source: " << std::endl;
-            std::cerr << buildLog;
+            printf("Error in OpenCL C source: \n");
+            printf("%s\n",buildLog);
             checkErr(errNum, "clBuildProgram");
     }
 

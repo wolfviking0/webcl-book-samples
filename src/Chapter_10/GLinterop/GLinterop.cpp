@@ -28,9 +28,14 @@
 #include <windows.h>
 #endif
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 
-#ifdef __GNUC__
+#ifdef __EMSCRIPTEN__
+#include <GL/glut.h>
+#else
+#include <GL/freeglut.h>
+#endif
+
+#if defined(__GNUC__) && !defined(__EMSCRIPTEN__)
 #include <GL/glx.h>
 #endif
 
@@ -65,7 +70,7 @@ void renderVBO( int vbolen )
 	glLineWidth(2.0f);
     // Draw VBO containing the point list coordinates, to place GL_POINTS at feature locations
     // bind VBOs for vertex array and index array
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo);         // for vertex coordinates
+    glBindBuffer(GL_ARRAY_BUFFER_ARB, vbo);         // for vertex coordinates
     glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
     glVertexPointer( 2, GL_FLOAT, 0, 0 );
 	 
@@ -75,7 +80,7 @@ void renderVBO( int vbolen )
     glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
 
     // bind with 0, so, switch back to normal pointer operation
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+    glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 }
 
 ///
@@ -83,10 +88,10 @@ void renderVBO( int vbolen )
 //
 void displayTexture(int w, int h)
 {
-	glEnable(GL_TEXTURE_RECTANGLE_ARB);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex );
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, tex );
 	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
+        glTexCoord2f(0, 0);
 		glVertex2f(0, 0);
 		glTexCoord2f(0, h);
 		glVertex2f(0, h);
@@ -95,7 +100,7 @@ void displayTexture(int w, int h)
 		glTexCoord2f(w, 0);
 		glVertex2f(w, 0);
 	glEnd();
-	glDisable(GL_TEXTURE_RECTANGLE_ARB);
+	glDisable(GL_TEXTURE_2D);
 }
 
 void reshape(int width, int height) 
@@ -156,11 +161,13 @@ void initGlut(int argc, char *argv[], int wWidth, int wHeight)
 	glutKeyboardFunc(KeyboardGL);
 	
     glewInit();
+    #ifndef __EMSCRIPTEN__
     if (glewIsSupported("GL_VERSION_2_1"))
         printf("Ready for OpenGL 2.1\n");
     else {
 		printf("Warning: Detected that OpenGL 2.1 not supported\n");
     }
+    #endif
 
 }
 
@@ -168,10 +175,13 @@ void initTexture( int width, int height )
 {
     // make a texture for output
 	glGenTextures(1, &tex);              // texture 
-    glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,  GL_REPLACE );
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width,
-            height, 0, GL_LUMINANCE, GL_FLOAT, NULL );
+    //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,  GL_REPLACE );
+
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL );
+
+    //glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex);
+    //glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width, height, 0, GL_LUMINANCE, GL_FLOAT, NULL );
 }
 
 
@@ -328,7 +338,7 @@ void performQueries() {
 //  Create an OpenCL context on the first available platform using
 //  either a GPU or CPU depending on what is available.
 //
-cl_context CreateContext()
+cl_context CreateContext(int use_gpu)
 {
     cl_int errNum;
     cl_uint numPlatforms;
@@ -357,6 +367,10 @@ cl_context CreateContext()
 		(cl_context_properties)wglGetCurrentContext(),
 		CL_WGL_HDC_KHR,
 		(cl_context_properties)wglGetCurrentDC(),
+#elif __EMSCRIPTEN__
+        CL_CONTEXT_PLATFORM, (cl_context_properties)firstPlatformId, 
+        CL_GL_CONTEXT_KHR, 0, 
+        CL_GLX_DISPLAY_KHR, 0,         
 #elif defined( __GNUC__)
 		CL_CONTEXT_PLATFORM, (cl_context_properties)firstPlatformId, 
 		CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 
@@ -372,29 +386,29 @@ cl_context CreateContext()
 	cl_uint uiDevCount;
     cl_device_id* cdDevices;
 	// Get the number of GPU devices available to the platform
-    errNum = clGetDeviceIDs(firstPlatformId, CL_DEVICE_TYPE_GPU, 0, NULL, &uiDevCount);
+    errNum = clGetDeviceIDs(firstPlatformId, use_gpu?CL_DEVICE_TYPE_GPU:CL_DEVICE_TYPE_CPU, 0, NULL, &uiDevCount);
 
     // Create the device list
     cdDevices = new cl_device_id [uiDevCount];
-    errNum = clGetDeviceIDs(firstPlatformId, CL_DEVICE_TYPE_GPU, uiDevCount, cdDevices, NULL);
+    errNum = clGetDeviceIDs(firstPlatformId, use_gpu?CL_DEVICE_TYPE_GPU:CL_DEVICE_TYPE_CPU, uiDevCount, cdDevices, NULL);
 
 
     context = clCreateContext(contextProperties, 1, &cdDevices[0], NULL, NULL, &errNum);
 	//// alternate:
     //context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_GPU,
     //                                  NULL, NULL, &errNum);
-
+    /*
     if (errNum != CL_SUCCESS)
     {
         std::cout << "Could not create GPU context, trying CPU..." << std::endl;
         context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_CPU,
-                                          NULL, NULL, &errNum);
+                                          NULL, NULL, &errNum);*/
         if (errNum != CL_SUCCESS)
         {
             std::cerr << "Failed to create an OpenCL GPU or CPU context." << std::endl;
             return NULL;
         }
-    }
+    //}
 
     return context;
 }
@@ -509,7 +523,7 @@ bool CreateMemObjects(cl_context context, GLuint texture, GLuint vbo, cl_mem *p_
 		return false;
 	}
 	
-	*p_cl_tex_mem = clCreateFromGLTexture2D(context, CL_MEM_READ_WRITE, GL_TEXTURE_RECTANGLE_ARB, 0, texture, &errNum );
+	*p_cl_tex_mem = clCreateFromGLTexture2D(context, CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0, texture, &errNum );
 	if( errNum != CL_SUCCESS )
 	{
 		std::cerr<< "Failed creating memory from GL texture." << std::endl;
@@ -553,7 +567,8 @@ void Cleanup()
 	}
 	if( tex != 0 ) 
 	{
-		glBindBuffer(GL_TEXTURE_RECTANGLE_ARB, tex );
+        glBindBuffer(GL_TEXTURE_2D, tex );
+		//glBindBuffer(GL_TEXTURE_RECTANGLE_ARB, tex );
 		glDeleteBuffers(1, &tex);
 	}
 	exit(0);
@@ -566,16 +581,33 @@ int main(int argc, char** argv)
 {
     cl_device_id device = 0;
 
-	imWidth = 256; 
-	imHeight = 256;
+	imWidth = 512; 
+	imHeight = 512;
 	vbolen = imHeight;
+
+    // Parse command line options
+    //
+    int use_gpu = 1;
+    for(int i = 0; i < argc && argv; i++)
+    {
+        if(!argv[i])
+            continue;
+            
+        if(strstr(argv[i], "cpu"))
+            use_gpu = 0;        
+
+        else if(strstr(argv[i], "gpu"))
+            use_gpu = 1;
+    }
+
+    printf("Parameter detect %s device\n",use_gpu==1?"GPU":"CPU");
 
 	initGlut(argc, argv, imWidth, imHeight);
 	vbo = initVBO(vbolen);
 	initTexture(imWidth,imHeight);
 
     // Create an OpenCL context on first available platform
-    context = CreateContext();
+    context = CreateContext(use_gpu);
     if (context == NULL)
     {
         std::cerr << "Failed to create OpenCL context." << std::endl;
