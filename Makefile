@@ -7,7 +7,7 @@
 
 EMCC:=../../../../webcl-translator/emscripten
 FREEIMAGE:=/Volumes/APPLE_MEDIA/WORKSPACE/webcl/FreeImage
-BOOST:=../../boost_1_55_0
+BOOST:=../../boost
 
 EMSCRIPTEN = $(EMCC)
 CXX = $(EMSCRIPTEN)/emcc
