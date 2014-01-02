@@ -96,7 +96,7 @@ all_3: \
 
 build_lib:
 	$(call chdir,libs/)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 ../../webcl-translator/emscripten/emcc $(BOOST_SRC) -I$(BOOST)/ -o libboost.o	
+	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 ../../webcl-translator/emscripten/emcc $(BOOST_SRC) -I$(BOOST)/ -o libboost.o
 
 hello_world_sample:
 	$(call chdir,src/Chapter_2/HelloWorld)
