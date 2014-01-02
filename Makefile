@@ -536,8 +536,9 @@ all_2: \
 all_3: \
 	histogram_sample \
 	dijkstra_sample \
-	flow_sample \
 	spmv_sample \
+
+#	flow_sample \
 
 build_lib:
 	$(call chdir,libs/)

@@ -769,7 +769,7 @@ void runDijkstraMultiGPUandCPU( cl_context gpuContext, cl_context cpuContext, Gr
     cl_uint totalDeviceCount = gpuDeviceCount + cpuDeviceCount;
 
     DevicePlan *devicePlans = (DevicePlan*) malloc(sizeof(DevicePlan) * totalDeviceCount);
-    //pthread_t *threadIDs = (pthread_t*) malloc(sizeof(pthread_t) * totalDeviceCount);
+    pthread_t *threadIDs = (pthread_t*) malloc(sizeof(pthread_t) * totalDeviceCount);
 
     int gpuResults = numResults / (ratioCPUtoGPU);
     cout << "gpuResults: " << gpuResults;
