@@ -32,7 +32,7 @@ const int ARRAY_SIZE = 1000;
 //  Create an OpenCL context on the first available platform using
 //  either a GPU or CPU depending on what is available.
 //
-cl_context CreateContext()
+cl_context CreateContext(int use_gpu)
 {
     cl_int errNum;
     cl_uint numPlatforms;
@@ -58,18 +58,15 @@ cl_context CreateContext()
         (cl_context_properties)firstPlatformId,
         0
     };
-    context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_GPU,
-                                      NULL, NULL, &errNum);
+    if (use_gpu)
+        context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_GPU, NULL, NULL, &errNum);
+    else
+        context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_CPU, NULL, NULL, &errNum);
+
     if (errNum != CL_SUCCESS)
     {
-        std::cout << "Could not create GPU context, trying CPU..." << std::endl;
-        context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_CPU,
-                                          NULL, NULL, &errNum);
-        if (errNum != CL_SUCCESS)
-        {
-            std::cerr << "Failed to create an OpenCL GPU or CPU context." << std::endl;
-            return NULL;
-        }
+        std::cout << "Could not create an OpenCL GPU or CPU context, trying CPU..." << std::endl;
+        return NULL;
     }
 
     return context;
@@ -234,8 +231,25 @@ int main(int argc, char** argv)
     cl_mem memObjects[3] = { 0, 0, 0 };
     cl_int errNum;
 
+    // Parse command line options
+    //
+    int use_gpu = 1;
+    for(int i = 0; i < argc && argv; i++)
+    {
+        if(!argv[i])
+            continue;
+            
+        if(strstr(argv[i], "cpu"))
+            use_gpu = 0;        
+
+        else if(strstr(argv[i], "gpu"))
+            use_gpu = 1;
+    }
+
+    printf("Parameter detect %s device\n",use_gpu==1?"GPU":"CPU");
+
     // Create an OpenCL context on first available platform
-    context = CreateContext();
+    context = CreateContext(use_gpu);
     if (context == NULL)
     {
         std::cerr << "Failed to create OpenCL context." << std::endl;

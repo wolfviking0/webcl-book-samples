@@ -349,7 +349,7 @@ public:
 				<< str 
 				<< "." 
 				<< std::endl;
-			return;
+			//return;
 		}
 
 		T * info = (T *)alloca(sizeof(T) * paramValueSize);
@@ -366,7 +366,7 @@ public:
 				<< str 
 				<< "." 
 				<< std::endl;
-			return;
+			//return;
 		}
 
 		if (ArrayType<T>::isChar())
@@ -389,7 +389,7 @@ public:
 					<< "Failed to find OpenCL device info " 
 					<< "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS." 
 					<< std::endl;
-				return;
+				//return;
 			}
 		
 			std::cout << "\t" << str << ":\t" ; 
