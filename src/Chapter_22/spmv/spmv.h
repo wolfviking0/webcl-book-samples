@@ -49,7 +49,6 @@
 #define CHECK_RESULT(_string) {                    \
    if (rc != CL_SUCCESS) {                         \
       printf("%s failed. rc = %d\n", _string, rc); \
-      exit(EXIT_FAILURE);                          \
    }                                               \
 }
 

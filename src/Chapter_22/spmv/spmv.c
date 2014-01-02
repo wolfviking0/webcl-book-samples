@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
    static int gpu_wgsz = MAX_WGSZ;
 
    /* The external file containing the matrix data in Matrix Market format */
-   static char *file_name;
+   static char *file_name = "spmv.mm";
    
    /* These variables deal with the source file for the kernel, and the names of the kernels contained therein. */
    char kernel_source_file[8] = "spmv.cl";

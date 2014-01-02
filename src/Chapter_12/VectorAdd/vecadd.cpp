@@ -40,10 +40,28 @@ kernelSourceCode[] =
 "}                                                                           \n"
 ;
 
+
 int
-main(void)
+main(int argc, char ** argv)
 {
     cl_int err;
+
+    // Parse command line options
+    //
+    int use_gpu = 1;
+    for(int i = 0; i < argc && argv; i++)
+    {
+        if(!argv[i])
+            continue;
+            
+        if(strstr(argv[i], "cpu"))
+            use_gpu = 0;        
+
+        else if(strstr(argv[i], "gpu"))
+            use_gpu = 1;
+    }
+
+    printf("Parameter detect %s device\n",use_gpu==1?"GPU":"CPU");
 
     // Initialize A, B, C
     for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -61,7 +79,7 @@ main(void)
         // Pick first platform
         cl_context_properties cprops[] = {
             CL_CONTEXT_PLATFORM, (cl_context_properties)(platformList[0])(), 0};
-        cl::Context context(CL_DEVICE_TYPE_GPU, cprops);
+        cl::Context context(use_gpu?CL_DEVICE_TYPE_GPU:CL_DEVICE_TYPE_CPU, cprops);
 
         // Query the set of devices attched to the context
         std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
@@ -74,6 +92,7 @@ main(void)
         program.build(devices);
 
         // Create buffer for A and copy host contents
+        //CL_SET_TYPE_POINTER(CL_SIGNED_INT32);
         cl::Buffer aBuffer = cl::Buffer(
             context, 
             CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
@@ -81,6 +100,7 @@ main(void)
             (void *) &A[0]);
 
         // Create buffer for B and copy host contents
+        CL_SET_TYPE_POINTER(CL_SIGNED_INT32);
         cl::Buffer bBuffer = cl::Buffer(
             context, 
             CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
@@ -88,6 +108,7 @@ main(void)
             (void *) &B[0]);
 
         // Create buffer for that uses the host ptr C
+        CL_SET_TYPE_POINTER(CL_SIGNED_INT32);
         cl::Buffer cBuffer = cl::Buffer(
             context, 
             CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, 
@@ -115,6 +136,7 @@ main(void)
 
         // Map cBuffer to host pointer. This enforces a sync with 
         // the host backing space, remember we choose GPU device.
+        CL_SET_TYPE_POINTER(CL_SIGNED_INT32);
         int * output = (int *) queue.enqueueMapBuffer(
             cBuffer,
             CL_TRUE, // block 
@@ -123,7 +145,7 @@ main(void)
             BUFFER_SIZE * sizeof(int));
 
         for (int i = 0; i < BUFFER_SIZE; i++) {
-            std::cout << C[i] << " ";
+            std::cout << output[i] << " ";
         }
         std::cout << std::endl;
 

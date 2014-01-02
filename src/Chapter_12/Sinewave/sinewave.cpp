@@ -13,7 +13,7 @@
 //    Simple OpenCL and OpenGL application to  demonstrate use OpenCL C++ Wrapper API.
 #include <GL/glew.h>
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
 #include <GL/glx.h>
 #endif //!_WIN32
 
@@ -38,9 +38,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "bmpLoader.hpp"  // Header file for Bitmap image
+#include "bmpLoader.h"  // Header file for Bitmap image
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
 #include <GL/glx.h>
 #endif //!_WIN32
 
@@ -247,20 +247,24 @@ void display(void)
     glRotatef(rotateY, 0.0, 1.0, 0.0);
 
     // render from the vbo
-    glBindBuffer(GL_ARRAY_BUFFER, pvbo[currVBO]);
-    glVertexPointer(4, GL_FLOAT, 0, 0);
+    //glBindBuffer(GL_ARRAY_BUFFER, pvbo[currVBO]);
+    //glVertexPointer(4, GL_FLOAT, 0, 0);
 
  //   glActiveTexture(GL_TEXTURE0);
  //   glBindTexture(GL_TEXTURE_2D, texture);
 
     //glUseProgram(glProgram);
+        
+    glBindVertexArray(pvbo[currVBO]);
+
     glEnableClientState(GL_VERTEX_ARRAY);
     glColor3f(1.0, 0.0, 0.0);
-    glDrawArrays(GL_POINTS, 0, meshWidth * meshHeight);
+    
+    glDrawArrays(GL_POINTS, 0, 1/*meshWidth * meshHeight*/);
+    
     glDisableClientState(GL_VERTEX_ARRAY);
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+    
     glutSwapBuffers();
     glutPostRedisplay();
 
@@ -336,6 +340,25 @@ main(int argc, char ** argv)
 {
     cl_int err;
 
+    // Parse command line options
+    //
+    int use_gpu = 1;
+    for(int i = 0; i < argc && argv; i++)
+    {
+        if(!argv[i])
+            continue;
+            
+        if(strstr(argv[i], "cpu"))
+            use_gpu = 0;        
+
+        else if(strstr(argv[i], "gpu"))
+            use_gpu = 1;
+    }
+
+    printf("Parameter detect %s device\n",use_gpu==1?"GPU":"CPU");
+
+    useGPU = use_gpu;
+
     if(numVBOs < 1) {
         numVBOs = 1;
     }
@@ -348,12 +371,14 @@ main(int argc, char ** argv)
 
     // GL init
     glewInit();
+    #ifndef __EMSCRIPTEN__
     if (! glewIsSupported( "GL_VERSION_2_0 " "GL_ARB_pixel_buffer_object")) {
           std::cerr
               << "Support for necessary OpenGL extensions missing."
               << std::endl;
           return EXIT_FAILURE;
     }
+    #endif
 
     glEnable(GL_TEXTURE_2D);
     glClearColor( 0.0, 0.0, 0.0, 1.0);
@@ -393,7 +418,7 @@ main(int argc, char ** argv)
                 << std::endl;
             exit(1);
         }
-#ifdef linux
+#if defined(linux) || defined(__EMSCRIPTEN__)
 #define _malloca    alloca
 #endif //linux
         cl_platform_id *platforms = (cl_platform_id*) _malloca(
@@ -426,12 +451,12 @@ main(int argc, char ** argv)
                     << "ERROR: "
                     << "clGetPlatformInfo() returned code " << err
                     << std::endl;
-                exit(1);
+                //exit(1);
             }
-            if(!strcmp(Str, platformName.data())) {
+            //if(!strcmp(Str, platformName.data())) {
                 platform = &platforms[i];
                 break;
-            }
+            //}
         }
         if(!platformName.length()) {
             platform = &platforms[0];
@@ -446,6 +471,8 @@ main(int argc, char ** argv)
 
 #ifdef _WIN32
         HGLRC glCtx = wglGetCurrentContext();
+#elif __EMSCRIPTEN__    
+        int glCtx = 0;
 #else //!_WIN32
         GLXContext glCtx = glXGetCurrentContext();
 #endif //!_WIN32
@@ -454,6 +481,8 @@ main(int argc, char ** argv)
             CL_CONTEXT_PLATFORM, (intptr_t) *platform,
 #ifdef _WIN32
             CL_WGL_HDC_KHR, (intptr_t) wglGetCurrentDC(),
+#elif __EMSCRIPTEN__
+            CL_GLX_DISPLAY_KHR, (intptr_t) 0,       
 #else //!_WIN32
             CL_GLX_DISPLAY_KHR, (intptr_t) glXGetCurrentDisplay(),
 #endif //!_WIN32

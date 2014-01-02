@@ -635,7 +635,7 @@ main(int argc, char **argv)
     err |= clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, 0, NULL, &ext_size);
     if (err) {
         printf("clGetDeviceInfo() failed. (%d)\n", err);
-        return EXIT_FAILURE;
+        //return EXIT_FAILURE;
     }
 
     // Check if 32 bit local atomics are supported
@@ -643,7 +643,7 @@ main(int argc, char **argv)
     clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, ext_size+1, ext_string, NULL);
     if (ext_string == NULL) {
         printf("clGetDeviceInfo() failed. (%d)\n", err);
-        return EXIT_FAILURE;
+        //return EXIT_FAILURE;
     }
 
     if (!strstr(ext_string, "cl_khr_local_int32_base_atomics")) {
