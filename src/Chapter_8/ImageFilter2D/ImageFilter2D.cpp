@@ -27,7 +27,7 @@
 #include <CL/cl.h>
 #endif
 
-#include "FreeImage.h"
+#include <FreeImage.h>
 
 ///
 //  Create an OpenCL context on the first available platform using
@@ -275,7 +275,6 @@ size_t RoundUp(int groupSize, int globalSize)
      	return globalSize + groupSize - r;
     }
 }
-
 ///
 //	main() for HelloBinaryWorld example
 //
@@ -296,7 +295,6 @@ int main(int argc, char** argv)
         std::cerr << "USAGE: " << argv[0] << " <inputImageFile> <outputImageFiles>" << std::endl;
         return 1;
     }
-
     // Create an OpenCL context on first available platform
     context = CreateContext();
     if (context == NULL)
@@ -304,7 +302,6 @@ int main(int argc, char** argv)
         std::cerr << "Failed to create OpenCL context." << std::endl;
         return 1;
     }
-
     // Create a command-queue on the first device available
     // on the created context
     commandQueue = CreateCommandQueue(context, &device);
@@ -355,7 +352,6 @@ int main(int argc, char** argv)
         Cleanup(context, commandQueue, program, kernel, imageObjects, sampler);
         return 1;
     }
-
 
     // Create sampler for sampling image object
     sampler = clCreateSampler(context,

@@ -6,7 +6,7 @@
 #
 
 EMCC:=../../../../webcl-translator/emscripten
-FREEIMAGE:=../../freeimage
+FREEIMAGE:=../../../../freeimage
 BOOST:=../../boost
 
 EMSCRIPTEN = $(EMCC)
@@ -66,6 +66,28 @@ BOOST_SRC = \
 	$(BOOST)/libs/regex/src/static_mutex.cpp \
 	$(BOOST)/libs/regex/src/instances.cpp \
 	$(BOOST)/libs/filesystem/src/operations.cpp \
+
+FREEIMAGE_INC = \
+	-I$(FREEIMAGE)/Dist/\
+	-I$(FREEIMAGE)/Source/\
+	-I$(FREEIMAGE)/Source/DeprecationManager/\
+	-I$(FREEIMAGE)/Source/FreeImage\
+	-I$(FREEIMAGE)/Source/FreeImageToolkit/\
+	-I$(FREEIMAGE)/Source/LibJPEG/\
+	-I$(FREEIMAGE)/Source/LibMNG/\
+	-I$(FREEIMAGE)/Source/LibOpenJPEG/\
+	-I$(FREEIMAGE)/Source/LibPNG/\
+	-I$(FREEIMAGE)/Source/LibRawLite/\
+	-I$(FREEIMAGE)/Source/LibTIFF/\
+	-I$(FREEIMAGE)/Source/LibTIFF4/\
+	-I$(FREEIMAGE)/Source/Metadata/\
+	-I$(FREEIMAGE)/Source/OpenEXR/\
+	-I$(FREEIMAGE)/Source/OpenEXR/Half/\
+	-I$(FREEIMAGE)/Source/OpenEXR/Iex/\
+	-I$(FREEIMAGE)/Source/OpenEXR/IlmImf/\
+	-I$(FREEIMAGE)/Source/OpenEXR/IlmThread/\
+	-I$(FREEIMAGE)/Source/OpenEXR/Imath/\
+	-I$(FREEIMAGE)/Source/ZLib/
 
 #----------------------------------------------------------------------------------------#
 #----------------------------------------------------------------------------------------#
@@ -134,7 +156,7 @@ image_filter_sample:
 	$(call chdir,src/Chapter_8/ImageFilter2D)
 	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
 		ImageFilter2D.cpp \
-	-I$(FREEIMAGE)/Source \
+	$(FREEIMAGE_INC) \
 	$(MODE) \
 	--preload-file ImageFilter2D.cl \
 	-o ../../../build/$(PREFIX)book_image_filter.js
