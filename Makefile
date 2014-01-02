@@ -6,7 +6,7 @@
 #
 
 EMCC:=../../../../webcl-translator/emscripten
-FREEIMAGE:=/Volumes/APPLE_MEDIA/WORKSPACE/webcl/FreeImage
+FREEIMAGE:=../../freeimage
 BOOST:=../../boost
 
 EMSCRIPTEN = $(EMCC)
@@ -89,6 +89,103 @@ FREEIMAGE_INC = \
 	-I$(FREEIMAGE)/Source/ZLib/
 
 FREEIMAGE_SRC = \
+	$(FREEIMAGE)/Source/OpenEXR/Half/eLut.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Half/half.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Half/toFloat.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Iex/IexBaseExc.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Iex/IexThrowErrnoExc.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/b44ExpLogTable.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfAcesFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfB44Compressor.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfBoxAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfChannelList.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfChannelListAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfChromaticities.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfChromaticitiesAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfCompressionAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfCompressor.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfConvert.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfCRgbaFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfDoubleAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfEnvmap.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfEnvmapAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfFloatAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfFrameBuffer.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfFramesPerSecond.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfHeader.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfInputFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfIntAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfIO.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfKeyCode.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfKeyCodeAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfLineOrderAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfLut.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfMatrixAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfMisc.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfMultiView.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfOpaqueAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfOutputFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfPizCompressor.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfPreviewImage.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfPreviewImageAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfPxr24Compressor.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRational.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRationalAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRgbaFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRgbaYca.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRleCompressor.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfScanLineInputFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfStandardAttributes.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfStdIO.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfStringAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfStringVectorAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTestFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfThreading.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTileDescriptionAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTiledInputFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTiledMisc.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTiledOutputFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTiledRgbaFile.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTileOffsets.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTimeCode.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTimeCodeAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfVecAttribute.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfVersion.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfWav.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfZipCompressor.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathBox.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathColorAlgo.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathFun.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathMatrixAlgo.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathRandom.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathShear.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathVec.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThread.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadMutex.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadMutexPosix.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadPool.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadPosix.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadSemaphore.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadSemaphorePosix.cpp \
+	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadSemaphorePosixCompat.cpp \
+	\
+	$(FREEIMAGE)/Source/ZLib/adler32.c \
+	$(FREEIMAGE)/Source/ZLib/compress.c \
+	$(FREEIMAGE)/Source/ZLib/crc32.c \
+	$(FREEIMAGE)/Source/ZLib/deflate.c \
+	$(FREEIMAGE)/Source/ZLib/gzclose.c \
+	$(FREEIMAGE)/Source/ZLib/gzlib.c \
+	$(FREEIMAGE)/Source/ZLib/gzread.c \
+	$(FREEIMAGE)/Source/ZLib/gzwrite.c \
+	$(FREEIMAGE)/Source/ZLib/infback.c \
+	$(FREEIMAGE)/Source/ZLib/inffast.c \
+	$(FREEIMAGE)/Source/ZLib/inflate.c \
+	$(FREEIMAGE)/Source/ZLib/inftrees.c \
+	$(FREEIMAGE)/Source/ZLib/trees.c \
+	$(FREEIMAGE)/Source/ZLib/uncompr.c \
+	$(FREEIMAGE)/Source/ZLib/zutil.c \
+	\
 	$(FREEIMAGE)/Source/DeprecationManager/Deprecated.cpp \
 	$(FREEIMAGE)/Source/DeprecationManager/DeprecationMgr.cpp \
 	\
@@ -331,7 +428,6 @@ FREEIMAGE_SRC = \
 	$(FREEIMAGE)/Source/LibTIFF/tif_jpeg.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_luv.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_lzw.c \
-	$(FREEIMAGE)/Source/LibTIFF/tif_msdos.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_next.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_ojpeg.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_open.c \
@@ -346,11 +442,7 @@ FREEIMAGE_SRC = \
 	$(FREEIMAGE)/Source/LibTIFF/tif_tile.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_unix.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_version.c \
-	$(FREEIMAGE)/Source/LibTIFF/tif_vms.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_warning.c \
-	$(FREEIMAGE)/Source/LibTIFF/tif_win3.c \
-	$(FREEIMAGE)/Source/LibTIFF/tif_win32.c \
-	$(FREEIMAGE)/Source/LibTIFF/tif_wince.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_write.c \
 	$(FREEIMAGE)/Source/LibTIFF/tif_zip.c \
 	$(FREEIMAGE)/Source/LibTIFF/_FI_3151_PluginG3.cpp \
@@ -394,12 +486,8 @@ FREEIMAGE_SRC = \
 	$(FREEIMAGE)/Source/LibTIFF4/tif_swab.c \
 	$(FREEIMAGE)/Source/LibTIFF4/tif_thunder.c \
 	$(FREEIMAGE)/Source/LibTIFF4/tif_tile.c \
-	$(FREEIMAGE)/Source/LibTIFF4/tif_unix.c \
 	$(FREEIMAGE)/Source/LibTIFF4/tif_version.c \
-	$(FREEIMAGE)/Source/LibTIFF4/tif_vms.c \
 	$(FREEIMAGE)/Source/LibTIFF4/tif_warning.c \
-	$(FREEIMAGE)/Source/LibTIFF4/tif_win32.c \
-	$(FREEIMAGE)/Source/LibTIFF4/tif_wince.c \
 	$(FREEIMAGE)/Source/LibTIFF4/tif_write.c \
 	$(FREEIMAGE)/Source/LibTIFF4/tif_zip.c \
 	$(FREEIMAGE)/Source/LibTIFF4/tif_stream.cxx \
@@ -411,107 +499,8 @@ FREEIMAGE_SRC = \
 	$(FREEIMAGE)/Source/Metadata/TagConversion.cpp \
 	$(FREEIMAGE)/Source/Metadata/TagLib.cpp \
 	$(FREEIMAGE)/Source/Metadata/XTIFF.cpp \
-	\
-	$(FREEIMAGE)/Source/OpenEXR/Half/eLut.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Half/half.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Half/toFloat.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Iex/IexBaseExc.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Iex/IexThrowErrnoExc.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/b44ExpLogTable.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfAcesFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfB44Compressor.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfBoxAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfChannelList.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfChannelListAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfChromaticities.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfChromaticitiesAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfCompressionAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfCompressor.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfConvert.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfCRgbaFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfDoubleAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfEnvmap.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfEnvmapAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfFloatAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfFrameBuffer.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfFramesPerSecond.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfHeader.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfHuf.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfInputFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfIntAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfIO.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfKeyCode.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfKeyCodeAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfLineOrderAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfLut.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfMatrixAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfMisc.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfMultiView.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfOpaqueAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfOutputFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfPizCompressor.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfPreviewImage.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfPreviewImageAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfPxr24Compressor.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRational.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRationalAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRgbaFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRgbaYca.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfRleCompressor.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfScanLineInputFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfStandardAttributes.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfStdIO.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfStringAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfStringVectorAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTestFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfThreading.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTileDescriptionAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTiledInputFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTiledMisc.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTiledOutputFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTiledRgbaFile.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTileOffsets.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTimeCode.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfTimeCodeAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfVecAttribute.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfVersion.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfWav.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmImf/ImfZipCompressor.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathBox.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathColorAlgo.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathFun.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathMatrixAlgo.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathRandom.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathShear.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/Imath/ImathVec.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThread.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadMutex.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadMutexPosix.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadMutexWin32.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadPool.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadPosix.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadSemaphore.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadSemaphorePosix.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadSemaphorePosixCompat.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadSemaphoreWin32.cpp \
-	$(FREEIMAGE)/Source/OpenEXR/IlmThread/IlmThreadWin32.cpp \
-	\
-	$(FREEIMAGE)/Source/ZLib/adler32.c \
-	$(FREEIMAGE)/Source/ZLib/compress.c \
-	$(FREEIMAGE)/Source/ZLib/crc32.c \
-	$(FREEIMAGE)/Source/ZLib/deflate.c \
-	$(FREEIMAGE)/Source/ZLib/gzclose.c \
-	$(FREEIMAGE)/Source/ZLib/gzlib.c \
-	$(FREEIMAGE)/Source/ZLib/gzread.c \
-	$(FREEIMAGE)/Source/ZLib/gzwrite.c \
-	$(FREEIMAGE)/Source/ZLib/infback.c \
-	$(FREEIMAGE)/Source/ZLib/inffast.c \
-	$(FREEIMAGE)/Source/ZLib/inflate.c \
-	$(FREEIMAGE)/Source/ZLib/inftrees.c \
-	$(FREEIMAGE)/Source/ZLib/trees.c \
-	$(FREEIMAGE)/Source/ZLib/uncompr.c \
-	$(FREEIMAGE)/Source/ZLib/zutil.c
+	
+	
 
 #----------------------------------------------------------------------------------------#
 #----------------------------------------------------------------------------------------#
@@ -542,8 +531,8 @@ all_3: \
 
 build_lib:
 	$(call chdir,libs/)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 ../../webcl-translator/emscripten/emcc $(BOOST_SRC) -I$(BOOST)/ -o libboost.o	
 	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 ../../webcl-translator/emscripten/emcc $(FREEIMAGE_SRC) $(FREEIMAGE_INC) -o libfreeimage.o
+	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 ../../webcl-translator/emscripten/emcc $(BOOST_SRC) -I$(BOOST)/ -o libboost.o	
 
 hello_world_sample:
 	$(call chdir,src/Chapter_2/HelloWorld)
