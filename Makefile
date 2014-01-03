@@ -81,7 +81,6 @@ all_1: \
 	buffer_sample \
 
 all_2: \
-	image_filter_sample \
 	gl_interop_sample \
 	sinewave_sample \
 	vectoradd_sample \
@@ -91,6 +90,7 @@ all_3: \
 	dijkstra_sample \
 	spmv_sample \
 
+#	image_filter_sample \
 #	flow_sample \
 
 build_lib:
