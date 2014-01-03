@@ -81,6 +81,7 @@ all_1: \
 	buffer_sample \
 
 all_2: \
+	image_filter_sample \
 	gl_interop_sample \
 	sinewave_sample \
 	vectoradd_sample \
@@ -90,7 +91,6 @@ all_3: \
 	dijkstra_sample \
 	spmv_sample \
 
-#	image_filter_sample \
 #	flow_sample \
 
 build_lib:
@@ -133,11 +133,12 @@ image_filter_sample:
 	$(call chdir,src/Chapter_8/ImageFilter2D)
 	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
 		ImageFilter2D.cpp \
-		../../../externs/lib/libfreeimage-3.15.4.so \
 	-I../../../externs/include/ \
 	$(MODE) \
 	--preload-file ImageFilter2D.cl \
 	-o ../../../build/$(PREFIX)book_image_filter.js
+
+#		../../../externs/lib/libfreeimage-3.15.4.so \
 
 gl_interop_sample:
 	$(call chdir,src/Chapter_10/GLinterop)
@@ -179,11 +180,12 @@ dijkstra_sample:
 		oclDijkstra.cpp \
 		oclDijkstraKernel.cpp \
 		../../../externs/lib/libboost.o \
-	$(MODE) \
+	$(MODE) -s TOTAL_MEMORY=1024*1024*150 \
 	-I../../../externs/include/ \
 	--preload-file dijkstra.cl \
 	-o ../../../build/$(PREFIX)book_dijkstra.js
 
+# Use OpenCV :(
 flow_sample:
 	$(call chdir,src/Chapter_19/oclFlow)
 	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \

@@ -271,7 +271,6 @@ int main(int argc, char **argv)
 
     float *results = (float*) malloc(sizeof(float) * sourceVertices.size() * graph.vertexCount);
 
-
     // Run Dijkstra's algorithm
     pt::ptime startTimeCPU = pt::microsec_clock::local_time();
     if (doCPU)
