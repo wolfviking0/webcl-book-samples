@@ -124,7 +124,7 @@ compileProgram(const char * vsrc, const char * psrc)
 
 //------------------------------------------------------------------------
 
-static bool useGPU = false;
+static bool useGPU = true;
 size_t local_work_size[3];
 
 static int numVBOs = 1;
@@ -247,24 +247,20 @@ void display(void)
     glRotatef(rotateY, 0.0, 1.0, 0.0);
 
     // render from the vbo
-    //glBindBuffer(GL_ARRAY_BUFFER, pvbo[currVBO]);
-    //glVertexPointer(4, GL_FLOAT, 0, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, pvbo[currVBO]);
+    glVertexPointer(4, GL_FLOAT, 0, 0);
 
  //   glActiveTexture(GL_TEXTURE0);
  //   glBindTexture(GL_TEXTURE_2D, texture);
 
     //glUseProgram(glProgram);
-        
-    glBindVertexArray(pvbo[currVBO]);
-
     glEnableClientState(GL_VERTEX_ARRAY);
     glColor3f(1.0, 0.0, 0.0);
-    
-    glDrawArrays(GL_POINTS, 0, 1/*meshWidth * meshHeight*/);
-    
+    glDrawArrays(GL_POINTS, 0, meshWidth * meshHeight);
     glDisableClientState(GL_VERTEX_ARRAY);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
+
     glutSwapBuffers();
     glutPostRedisplay();
 
@@ -358,6 +354,7 @@ main(int argc, char ** argv)
     printf("Parameter detect %s device\n",use_gpu==1?"GPU":"CPU");
 
     useGPU = use_gpu;
+
 
     if(numVBOs < 1) {
         numVBOs = 1;
@@ -471,8 +468,8 @@ main(int argc, char ** argv)
 
 #ifdef _WIN32
         HGLRC glCtx = wglGetCurrentContext();
-#elif __EMSCRIPTEN__    
-        int glCtx = 0;
+#elif __EMSCRIPTEN__
+        intptr_t glCtx = 0;
 #else //!_WIN32
         GLXContext glCtx = glXGetCurrentContext();
 #endif //!_WIN32
@@ -482,7 +479,7 @@ main(int argc, char ** argv)
 #ifdef _WIN32
             CL_WGL_HDC_KHR, (intptr_t) wglGetCurrentDC(),
 #elif __EMSCRIPTEN__
-            CL_GLX_DISPLAY_KHR, (intptr_t) 0,       
+            CL_GLX_DISPLAY_KHR, (intptr_t) 0,
 #else //!_WIN32
             CL_GLX_DISPLAY_KHR, (intptr_t) glXGetCurrentDisplay(),
 #endif //!_WIN32

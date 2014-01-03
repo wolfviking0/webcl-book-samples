@@ -133,7 +133,7 @@ image_filter_sample:
 	$(call chdir,src/Chapter_8/ImageFilter2D)
 	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
 		ImageFilter2D.cpp \
-		../../../externs/lib/libfreeimage.o \
+		../../../externs/lib/libfreeimage-3.15.4.so \
 	-I../../../externs/include/ \
 	$(MODE) \
 	--preload-file ImageFilter2D.cl \
@@ -153,7 +153,7 @@ sinewave_sample:
 	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
 		bmpLoader.cpp \
 		sinewave.cpp \
-	$(MODE) -s LEGACY_GL_EMULATION=1 -s GL_UNSAFE_OPTS=0 \
+	$(MODE) -s GL_FFP_ONLY=1 -s LEGACY_GL_EMULATION=1 \
 	--preload-file sinewave.cl \
 	--preload-file ATIStream.bmp \
 	-o ../../../build/$(PREFIX)book_sinewave.js
