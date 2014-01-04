@@ -146,8 +146,8 @@ static std::string platformName = "ATI Stream";
 const unsigned int windowWidth = 512;
 const unsigned int windowHeight = 512;
 
-const unsigned int meshWidth  = 512; //256;
-const unsigned int meshHeight = 512; //256;
+const unsigned int meshWidth  = 256; //512;
+const unsigned int meshHeight = 256; //512;
 
 // vbo variables
 GLuint *pvbo;
@@ -363,6 +363,8 @@ void createVBO(GLuint* vbo)
 int
 main(int argc, char ** argv)
 {
+    int err;
+
     // Parse command line options
     //
     int use_gpu = 1;
@@ -425,7 +427,7 @@ main(int argc, char ** argv)
 
 #ifdef USE_OPENCL
     try {
-        cl_int err;
+        
         cl_uint num_platforms;
 
         err = clGetPlatformIDs(0, NULL, &num_platforms);

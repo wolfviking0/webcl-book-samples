@@ -154,7 +154,7 @@ sinewave_sample:
 	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
 		bmpLoader.cpp \
 		sinewave.cpp \
-	$(MODE) -s GL_FFP_ONLY=1 -s LEGACY_GL_EMULATION=1 \
+	$(MODE) -s TOTAL_MEMORY=1024*1024*50 -s GL_UNSAFE_OPTS=0 -s GL_MAX_TEMP_BUFFER_SIZE=8388608 -s GL_FFP_ONLY=1 -s LEGACY_GL_EMULATION=1 \
 	--preload-file sinewave.cl \
 	--preload-file ATIStream.bmp \
 	-o ../../../build/$(PREFIX)book_sinewave.js
