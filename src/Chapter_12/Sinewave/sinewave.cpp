@@ -13,19 +13,19 @@
 //    Simple OpenCL and OpenGL application to  demonstrate use OpenCL C++ Wrapper API.
 #include <GL/glew.h>
 
-#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
-#include <GL/glx.h>
-#endif //!_WIN32
-
 #if defined(__APPLE__) || defined(__MACOSX)
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
 
-#define __CL_ENABLE_EXCEPTIONS
+#define USE_OPENCL
 
-#include <CL/cl.hpp>
+#ifdef USE_OPENCL
+    #define __CL_ENABLE_EXCEPTIONS
+
+    #include <CL/cl.hpp>
+#endif
 
 #if defined(__APPLE__) || defined(__MACOSX)
 #include <OpenGL/opengl.h>
@@ -40,9 +40,11 @@
 
 #include "bmpLoader.h"  // Header file for Bitmap image
 
-#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
+#if !defined(_WIN32) && !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
 #include <GL/glx.h>
 #endif //!_WIN32
+
+
 
 //------------------------------------------------------------------------
 
@@ -133,11 +135,13 @@ static int mapAll = 0;
 static std::string platformName = "ATI Stream";
 
 // Global CL values
-cl::Context context;
-cl::Program program;
-cl::Kernel kernel;
-cl::CommandQueue queue;
-cl::Buffer *pVbo;
+#ifdef USE_OPENCL
+    cl::Context context;
+    cl::Program program;
+    cl::Kernel kernel;
+    cl::CommandQueue queue;
+    cl::Buffer *pVbo;
+#endif
 
 const unsigned int windowWidth = 512;
 const unsigned int windowHeight = 512;
@@ -200,6 +204,7 @@ bool loadTexture(GLuint * texture) {
 
 void runCL()
 {
+    #ifdef USE_OPENCL
     std::vector<cl::Memory> v;
 
     if(mapAll) {
@@ -230,6 +235,7 @@ void runCL()
     }
 
     queue.enqueueReleaseGLObjects(&v);
+    #endif
 }
 
 void display(void)
@@ -277,7 +283,9 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
 #ifdef _WIN32
     case VK_ESCAPE:
 #endif //_WIN32
+#ifdef USE_OPENCL    
         queue.finish();
+#endif        
         exit( 0);
     }
 }
@@ -312,6 +320,7 @@ void motion(int x, int y)
     mouseOldY = y;
 }
 
+#ifdef USE_OPENCL
 void createVBO(GLuint* vbo, cl::Buffer * buffer)
 {
     // create buffer object
@@ -329,13 +338,31 @@ void createVBO(GLuint* vbo, cl::Buffer * buffer)
         CL_MEM_READ_WRITE,
         *vbo);
 }
+#else
+void createVBO(GLuint* vbo)
+{
+    float* vert = new float[meshWidth * meshHeight * 4];     // vertex array
 
+    for (int i = 0; i < meshWidth * meshHeight * 4 ; i++) {
+        vert[i] = rand();
+    }
+
+
+    // create buffer object
+    glGenBuffers(1, vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+
+    // initialize buffer object
+    unsigned int size = meshWidth * meshHeight * 4 * sizeof( float);
+    glBufferData(GL_ARRAY_BUFFER, size, vert, GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+#endif
 
 int
 main(int argc, char ** argv)
 {
-    cl_int err;
-
     // Parse command line options
     //
     int use_gpu = 1;
@@ -368,7 +395,7 @@ main(int argc, char ** argv)
 
     // GL init
     glewInit();
-    #ifndef __EMSCRIPTEN__
+    #if !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
     if (! glewIsSupported( "GL_VERSION_2_0 " "GL_ARB_pixel_buffer_object")) {
           std::cerr
               << "Support for necessary OpenGL extensions missing."
@@ -396,7 +423,9 @@ main(int argc, char ** argv)
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
 
+#ifdef USE_OPENCL
     try {
+        cl_int err;
         cl_uint num_platforms;
 
         err = clGetPlatformIDs(0, NULL, &num_platforms);
@@ -415,7 +444,7 @@ main(int argc, char ** argv)
                 << std::endl;
             exit(1);
         }
-#if defined(linux) || defined(__EMSCRIPTEN__)
+#if defined(linux) || defined(__EMSCRIPTEN__) || defined(__APPLE__)
 #define _malloca    alloca
 #endif //linux
         cl_platform_id *platforms = (cl_platform_id*) _malloca(
@@ -470,6 +499,9 @@ main(int argc, char ** argv)
         HGLRC glCtx = wglGetCurrentContext();
 #elif __EMSCRIPTEN__
         intptr_t glCtx = 0;
+#elif __APPLE__
+        CGLContextObj kCGLContext = CGLGetCurrentContext();     
+        CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);         
 #else //!_WIN32
         GLXContext glCtx = glXGetCurrentContext();
 #endif //!_WIN32
@@ -480,10 +512,14 @@ main(int argc, char ** argv)
             CL_WGL_HDC_KHR, (intptr_t) wglGetCurrentDC(),
 #elif __EMSCRIPTEN__
             CL_GLX_DISPLAY_KHR, (intptr_t) 0,
+#elif __APPLE__
+            CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)kCGLShareGroup,
 #else //!_WIN32
             CL_GLX_DISPLAY_KHR, (intptr_t) glXGetCurrentDisplay(),
 #endif //!_WIN32
+#ifndef __APPLE__      
             CL_GL_CONTEXT_KHR, (intptr_t) glCtx,
+#endif            
             0, 0
         };
 
@@ -564,6 +600,17 @@ main(int argc, char ** argv)
 
          return EXIT_FAILURE;
     }
+
+    #else
+        pvbo = new GLuint[numVBOs];
+
+        for(int i = 0; i < numVBOs; i++) {
+            createVBO(&pvbo[i]);
+        }
+
+        glutMainLoop();
+
+    #endif
 
     return EXIT_SUCCESS;
 }
