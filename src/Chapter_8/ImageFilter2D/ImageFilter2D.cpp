@@ -29,11 +29,16 @@
 
 #include <FreeImage.h>
 
+#ifdef __EMSCRIPTEN__
+#include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
+#include "SDL/SDL_opengl.h"
+#endif
 ///
 //  Create an OpenCL context on the first available platform using
 //  either a GPU or CPU depending on what is available.
 //
-cl_context CreateContext()
+cl_context CreateContext(int use_gpu)
 {
     cl_int errNum;
     cl_uint numPlatforms;
@@ -59,18 +64,20 @@ cl_context CreateContext()
         (cl_context_properties)firstPlatformId,
         0
     };
-    context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_GPU,
+    context = clCreateContextFromType(contextProperties, use_gpu?CL_DEVICE_TYPE_GPU:CL_DEVICE_TYPE_CPU,
                                       NULL, NULL, &errNum);
     if (errNum != CL_SUCCESS)
     {
+        /*
         std::cout << "Could not create GPU context, trying CPU..." << std::endl;
         context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_CPU,
                                           NULL, NULL, &errNum);
         if (errNum != CL_SUCCESS)
         {
+        */
             std::cerr << "Failed to create an OpenCL GPU or CPU context." << std::endl;
             return NULL;
-        }
+        //}
     }
 
     return context;
@@ -275,6 +282,85 @@ size_t RoundUp(int groupSize, int globalSize)
      	return globalSize + groupSize - r;
     }
 }
+#ifdef __EMSCRIPTEN__
+void showtexture(char * buffer, int width, int height)
+{
+    SDL_Surface *screen;
+
+    // Slightly different SDL initialization
+    if ( SDL_Init(SDL_INIT_VIDEO) != 0 ) {
+        printf("Unable to initialize SDL: %s\n", SDL_GetError());
+        return;
+    }
+
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 ); // *new*
+
+    screen = SDL_SetVideoMode( width + 10, height + 10, 16, SDL_OPENGL ); // *changed*
+    if ( !screen ) {
+        printf("Unable to set video mode: %s\n", SDL_GetError());
+        return;
+    }
+
+    glClearColor(0,0,0,0);
+ 
+    // Setup our screen
+    glViewport(0,0,522, 522);
+    glMatrixMode(GL_PROJECTION);
+    
+    GLfloat matrixData[] = { 2.0/(width + 10),        0,  0,  0,
+                                    0, -2.0/(height + 10),  0,  0,
+                                    0,        0, -1,  0,
+                                   -1,        1,  0,  1 };
+    glLoadMatrixf(matrixData); // test loadmatrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+    
+    // Ensure correct display of polygons
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);  
+
+    GLubyte* textura = new GLubyte[4 * width * height];
+    
+    //FreeImage loads in BGR format, so you need to swap some bytes(Or use GL_BGR).
+    for(int j= 0; j<width * height; j++){
+        textura[j*4+0]= buffer[j*4+2];
+        textura[j*4+1]= buffer[j*4+1];
+        textura[j*4+2]= buffer[j*4+0];
+        textura[j*4+3]= buffer[j*4+3];
+    }
+
+    GLuint textures[1];
+    glGenTextures( 1, textures );
+
+    glBindTexture( GL_TEXTURE_2D, textures[0] );
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)textura);
+
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity(); // Reset current matrix (Modelview)
+
+    // Enable texturing and select first texture
+    glColor3f(1.0f,1.0f,1.0f);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,textures[0]);
+
+    glBegin(GL_TRIANGLE_STRIP);
+
+    glTexCoord2i( 0, 1 ); glVertex3f( 5, 5, 0 );
+    glTexCoord2i( 0, 0 ); glVertex3f( 5, height + 5, 0 );
+    glTexCoord2i( 1, 1 ); glVertex3f( width + 5, 5, 0 );
+    glTexCoord2i( 1, 0 ); glVertex3f( width + 5, height + 5, 0 );
+
+    glEnd();
+
+    glFlush();
+    
+    SDL_GL_SwapBuffers();
+}
+#endif
 ///
 //	main() for HelloBinaryWorld example
 //
@@ -289,14 +375,40 @@ int main(int argc, char** argv)
     cl_sampler sampler = 0;
     cl_int errNum;
 
+    // Parse command line options
+    //
+    int use_gpu = 1;
+    for(int i = 0; i < argc && argv; i++)
+    {
+        if(!argv[i])
+            continue;
+            
+        if(strstr(argv[i], "cpu"))
+            use_gpu = 0;        
 
+        else if(strstr(argv[i], "gpu"))
+            use_gpu = 1;
+    }
+
+    printf("Parameter detect %s device\n",use_gpu==1?"GPU":"CPU");
+
+    /*
     if (argc != 3)
     {
         std::cerr << "USAGE: " << argv[0] << " <inputImageFile> <outputImageFiles>" << std::endl;
         return 1;
     }
+    */
+    #ifdef __EMSCRIPTEN__
+    std::string input = std::string("data/lena.png");
+    std::string output = std::string("data/lena.filter.tga");
+    #else
+    std::string input = std::string(argv[1]);
+    std::string output = std::string(argv[2]);
+    #endif
+
     // Create an OpenCL context on first available platform
-    context = CreateContext();
+    context = CreateContext(use_gpu);
     if (context == NULL)
     {
         std::cerr << "Failed to create OpenCL context." << std::endl;
@@ -325,13 +437,15 @@ int main(int argc, char** argv)
     // Load input image from file and load it into
     // an OpenCL image object
     int width, height;
-    imageObjects[0] = LoadImage(context, argv[1], width, height);
+    imageObjects[0] = LoadImage(context, const_cast<char*>(input.c_str()), width, height);
     if (imageObjects[0] == 0)
     {
-        std::cerr << "Error loading: " << std::string(argv[1]) << std::endl;
+        std::cerr << "Error loading: " << input << std::endl;
         Cleanup(context, commandQueue, program, kernel, imageObjects, sampler);
         return 1;
     }
+
+    printf("Image : %dx%d\n",width,height);
 
     // Create ouput image object
     cl_image_format clImageFormat;
@@ -429,11 +543,15 @@ int main(int argc, char** argv)
     std::cout << std::endl;
     std::cout << "Executed program succesfully." << std::endl;
 
+    #ifdef __EMSCRIPTEN__
+        showtexture(buffer, width , height);    
+    #endif
+
     //memset(buffer, 0xff, width * height * 4);
     // Save the image out to disk
-    if (!SaveImage(argv[2], buffer, width, height))
+    if (!SaveImage(const_cast<char*>(output.c_str()), buffer, width, height))
     {
-        std::cerr << "Error writing output image: " << argv[2] << std::endl;
+        std::cerr << "Error writing output image: " << output << std::endl;
         Cleanup(context, commandQueue, program, kernel, imageObjects, sampler);
         delete [] buffer;
         return 1;

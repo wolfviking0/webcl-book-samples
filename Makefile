@@ -133,12 +133,12 @@ image_filter_sample:
 	$(call chdir,src/Chapter_8/ImageFilter2D)
 	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
 		ImageFilter2D.cpp \
+		../../../externs/lib/libfreeimage-3.15.4.so \
 	-I../../../externs/include/ \
-	$(MODE) \
+	$(MODE) -s GL_FFP_ONLY=1 -s LEGACY_GL_EMULATION=1 \
+	--preload-file data/lena.png \
 	--preload-file ImageFilter2D.cl \
 	-o ../../../build/$(PREFIX)book_image_filter.js
-
-#		../../../externs/lib/libfreeimage-3.15.4.so \
 
 gl_interop_sample:
 	$(call chdir,src/Chapter_10/GLinterop)
