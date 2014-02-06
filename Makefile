@@ -5,14 +5,13 @@
 #  Copyright (c) 2013 Anthony Liot. All rights reserved.
 #
 
-EMCC:=../../../../webcl-translator/emscripten
-BOOST:=../../../boost
+CURRENT_ROOT:=$(PWD)/
 
-EMSCRIPTEN = $(EMCC)
-CXX = $(EMSCRIPTEN)/emcc
-AR = $(EMSCRIPTEN)/emar
-EMCONFIGURE = $(EMSCRIPTEN)/emconfigure
-EMMAKE = $(EMSCRIPTEN)/emmake
+EMSCRIPTEN_ROOT:=$(CURRENT_ROOT)../webcl-translator/emscripten
+
+CXX = $(EMSCRIPTEN_ROOT)/em++
+
+BOOST:=../../../boost
 
 CHDIR_SHELL := $(SHELL)
 define chdir
@@ -95,7 +94,7 @@ all_3: \
 
 build_lib:
 	$(call chdir,externs/lib/)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 ../../../webcl-translator/emscripten/emcc $(BOOST_SRC) -I../../externs/include/ -o libboost.o	
+	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) $(BOOST_SRC) -I../../externs/include/ -o libboost.o	
 
 hello_world_sample:
 	$(call chdir,src/Chapter_2/HelloWorld)
@@ -223,5 +222,5 @@ clean:
 	cp tmp/memoryprofiler.js ./
 	cp tmp/settings.js ./
 	rm -rf tmp/
-	../../webcl-translator/emscripten/emcc --clear-cache
+	$(CXX) --clear-cache
 
