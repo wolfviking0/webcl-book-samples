@@ -94,19 +94,21 @@ all_1: \
 	hello_world_sample \
 	info_sample \
 	convolution_sample \
-	buffer_sample \
+
 
 all_2: \
+	buffer_sample \
 	image_filter_sample \
-	gl_interop_sample \
-	sinewave_sample \
-	vectoradd_sample \
+
 
 all_3: \
-	histogram_sample \
-	dijkstra_sample \
-	spmv_sample \
+	gl_interop_sample \
+	vectoradd_sample \
 
+#	sinewave_sample \
+#	histogram_sample \
+#	dijkstra_sample \
+#	spmv_sample \
 #	flow_sample \
 
 build_lib:
