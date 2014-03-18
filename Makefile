@@ -26,8 +26,10 @@ EMSCRIPTEN_ROOT:=$(CURRENT_ROOT)../webcl-translator/emscripten
 endif
 
 CXX = $(EMSCRIPTEN_ROOT)/em++
+MAKE = $(EMSCRIPTEN_ROOT)/emmake
 
 BOOST:=../../../boost
+FREEIMAGE:=../freeimage
 
 CHDIR_SHELL := $(SHELL)
 define chdir
@@ -110,6 +112,10 @@ all_3: \
 #	dijkstra_sample \
 #	spmv_sample \
 #	flow_sample \
+
+build_freeimage:
+	$(call chdir,$(FREEIMAGE))
+	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(MAKE) make
 
 build_lib:
 	$(call chdir,externs/lib/)
