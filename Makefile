@@ -91,20 +91,20 @@ BOOST_SRC = \
 all: all_1 all_2 all_3
 
 all_1: \
+	build_lib \
 	hello_world_sample \
 	info_sample \
-	convolution_sample \
 
 
 all_2: \
 	buffer_sample \
-	image_filter_sample \
-
+	convolution_sample \
 
 all_3: \
 	gl_interop_sample \
 	vectoradd_sample \
 
+#   image_filter_sample \
 #	sinewave_sample \
 #	histogram_sample \
 #	dijkstra_sample \
