@@ -16,6 +16,9 @@
 // Enable OpenCL C++ exceptions
 #define __CL_ENABLE_EXCEPTIONS
 
+#ifndef __EMSCRIPTEN__
+    #define CL_SET_TYPE_POINTER(x)
+#endif
 
 #include <CL/cl.hpp>
 

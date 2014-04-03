@@ -18,7 +18,11 @@
 #include <sstream>
 
 #ifdef __APPLE__
-#include <OpenCL/cl.h>
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/CGLDevice.h>
+#include <GLUT/glut.h>
+#include <OpenCL/opencl.h>
 #else
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
@@ -31,11 +35,9 @@
 
 #ifdef __EMSCRIPTEN__
 #include <GL/glut.h>
-#else
-#include <GL/freeglut.h>
 #endif
 
-#if defined(__GNUC__) && !defined(__EMSCRIPTEN__)
+#if defined(__GNUC__) && !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
 #include <GL/glx.h>
 #endif
 
@@ -355,6 +357,10 @@ cl_context CreateContext(int use_gpu)
         return NULL;
     }
 
+#ifdef __APPLE__
+    CGLContextObj kCGLContext = CGLGetCurrentContext();
+    CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);
+#endif
     // Next, create an OpenCL context on the platform.  Attempt to
     // create a GPU-based context, and if that fails, try to create
     // a CPU-based context.
@@ -370,7 +376,10 @@ cl_context CreateContext(int use_gpu)
 #elif __EMSCRIPTEN__
         CL_CONTEXT_PLATFORM, (cl_context_properties)firstPlatformId, 
         CL_GL_CONTEXT_KHR, 0, 
-        CL_GLX_DISPLAY_KHR, 0,         
+        CL_GLX_DISPLAY_KHR, 0,   
+#elif  __APPLE__
+        CL_CONTEXT_PLATFORM, (cl_context_properties)firstPlatformId, 
+        CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)kCGLShareGroup,
 #elif defined( __GNUC__)
 		CL_CONTEXT_PLATFORM, (cl_context_properties)firstPlatformId, 
 		CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(), 

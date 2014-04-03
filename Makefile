@@ -1,251 +1,206 @@
 #
 #  Makefile
+#  Licence : https://github.com/wolfviking0/webcl-translator/blob/master/LICENSE
 #
 #  Created by Anthony Liot.
 #  Copyright (c) 2013 Anthony Liot. All rights reserved.
 #
 
-CURRENT_ROOT:=$(PWD)/
+# Default parameter
+DEB = 0
+VAL = 0
+NAT = 0
+ORIG= 0
+FAST= 1
 
-ORIG=0
-ifeq ($(ORIG),1)
-EMSCRIPTEN_ROOT:=$(CURRENT_ROOT)../emscripten
-else
-
-$(info )
-$(info )
-$(info **************************************************************)
-$(info **************************************************************)
-$(info ************ /!\ BUILD USE SUBMODULE CARREFUL /!\ ************)
-$(info **************************************************************)
-$(info **************************************************************)
-$(info )
-$(info )
-
-EMSCRIPTEN_ROOT:=$(CURRENT_ROOT)../webcl-translator/emscripten
-endif
-
-CXX = $(EMSCRIPTEN_ROOT)/em++
-MAKE = $(EMSCRIPTEN_ROOT)/emmake
-
-BOOST:=../../../boost
-FREEIMAGE:=../freeimage
-
+# Chdir function
 CHDIR_SHELL := $(SHELL)
 define chdir
    $(eval _D=$(firstword $(1) $(@D)))
    $(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
 endef
 
-DEB=0
-VAL=0
-FAST=1
+# Current Folder
+CURRENT_ROOT:=$(PWD)
 
-ifeq ($(VAL),1)
-PREFIX = val_
-VALIDATOR = '[""]' # Enable validator without parameter
-$(info ************  Mode VALIDATOR : Enabled ************)
-else
-PREFIX = 
-VALIDATOR = '[]' # disable validator
-$(info ************  Mode VALIDATOR : Disabled ************)
-endif
+# Current Boost
+CURRENT_BOOST:=$(CURRENT_ROOT)/externs/boost
 
-DEBUG = -s OPT_LEVEL=1 -s DEBUG_LEVEL=1 -s CL_VALIDATOR=$(VAL) -s CL_VAL_PARAM=$(VALIDATOR) -s CL_PRINT_TRACE=1 -s DISABLE_EXCEPTION_CATCHING=0 -s WARN_ON_UNDEFINED_SYMBOLS=1 -s CL_DEBUG=1 -s CL_GRAB_TRACE=1 -s CL_CHECK_VALID_OBJECT=1
+# Emscripten Folder
+EMSCRIPTEN_ROOT:=$(CURRENT_ROOT)/../webcl-translator/emscripten
 
-NO_DEBUG = -s OPT_LEVEL=2 -s DEBUG_LEVEL=0 -s CL_VALIDATOR=$(VAL) -s CL_VAL_PARAM=$(VALIDATOR) -s WARN_ON_UNDEFINED_SYMBOLS=0  -s CL_DEBUG=0 -s CL_GRAB_TRACE=0 -s CL_PRINT_TRACE=0 -s CL_CHECK_VALID_OBJECT=0
+# Native build
+ifeq ($(NAT),1)
+$(info ************ NATIVE : (GLEW)           ************)
+
+CXX = clang++
+CC  = clang
+
+BUILD_FOLDER = $(CURRENT_ROOT)/bin/
+EXTENSION = .out
 
 ifeq ($(DEB),1)
-MODE=$(DEBUG)
-EMCCDEBUG = EMCC_FAST_COMPILER=$(FAST) EMCC_DEBUG
-$(info ************  Mode DEBUG : Enabled ************)
+$(info ************ NATIVE : DEBUG = 1        ************)
+
+CFLAGS = -O0 -framework OpenCL -framework OpenGL -framework GLUT -framework CoreFoundation -framework AppKit -framework IOKit -framework CoreVideo -framework CoreGraphics -lGLEW
+
 else
-MODE=$(NO_DEBUG)
-EMCCDEBUG = EMCC_FAST_COMPILER=$(FAST) EMCCDEBUG
-$(info ************  Mode DEBUG : Disabled ************)
+$(info ************ NATIVE : DEBUG = 0        ************)
+
+CFLAGS = -O2 -framework OpenCL -framework OpenGL -framework GLUT -framework CoreFoundation -framework AppKit -framework IOKit -framework CoreVideo -framework CoreGraphics -lGLEW
+
 endif
 
-$(info )
-$(info )
+# Emscripten build
+else
+ifeq ($(ORIG),1)
+$(info ************ EMSCRIPTEN : SUBMODULE     = 0 ************)
 
-BOOST_SRC = \
-	$(BOOST)/libs/system/src/error_code.cpp \
-	$(BOOST)/libs/program_options/src/options_description.cpp \
-	$(BOOST)/libs/program_options/src/cmdline.cpp \
-	$(BOOST)/libs/program_options/src/variables_map.cpp \
-	$(BOOST)/libs/program_options/src/value_semantic.cpp \
-	$(BOOST)/libs/program_options/src/positional_options.cpp \
-	$(BOOST)/libs/program_options/src/convert.cpp \
-	$(BOOST)/libs/regex/src/regex.cpp \
-	$(BOOST)/libs/regex/src/cpp_regex_traits.cpp \
-	$(BOOST)/libs/regex/src/regex_raw_buffer.cpp \
-	$(BOOST)/libs/regex/src/regex_traits_defaults.cpp \
-	$(BOOST)/libs/regex/src/static_mutex.cpp \
-	$(BOOST)/libs/regex/src/instances.cpp \
-	$(BOOST)/libs/filesystem/src/operations.cpp \
+EMSCRIPTEN_ROOT:=$(CURRENT_ROOT)/../emscripten
+else
+$(info ************ EMSCRIPTEN : SUBMODULE     = 1 ************)
+endif
 
-#----------------------------------------------------------------------------------------#
-#----------------------------------------------------------------------------------------#
-# BUILD
-#----------------------------------------------------------------------------------------#
-#----------------------------------------------------------------------------------------#		
+CXX = $(EMSCRIPTEN_ROOT)/em++
+CC  = $(EMSCRIPTEN_ROOT)/emcc
 
-all: all_1 all_2 all_3
+BUILD_FOLDER = $(CURRENT_ROOT)/build/
+EXTENSION = .js
+GLOBAL =
+
+ifeq ($(DEB),1)
+$(info ************ EMSCRIPTEN : DEBUG         = 1 ************)
+
+GLOBAL += EMCC_DEBUG=1
+
+CFLAGS = -s OPT_LEVEL=1 -s DEBUG_LEVEL=1 -s CL_PRINT_TRACE=1 -s WARN_ON_UNDEFINED_SYMBOLS=1 -s CL_DEBUG=1 -s CL_GRAB_TRACE=1 -s CL_CHECK_VALID_OBJECT=1
+else
+$(info ************ EMSCRIPTEN : DEBUG         = 0 ************)
+
+CFLAGS = -s OPT_LEVEL=3 -s DEBUG_LEVEL=0 -s CL_PRINT_TRACE=0 -s DISABLE_EXCEPTION_CATCHING=0 -s WARN_ON_UNDEFINED_SYMBOLS=1 -s CL_DEBUG=0 -s CL_GRAB_TRACE=0 -s CL_CHECK_VALID_OBJECT=0
+endif
+
+ifeq ($(VAL),1)
+$(info ************ EMSCRIPTEN : VALIDATOR     = 1 ************)
+
+PREFIX = val_
+
+CFLAGS += -s CL_VALIDATOR=1
+else
+$(info ************ EMSCRIPTEN : VALIDATOR     = 0 ************)
+endif
+
+ifeq ($(FAST),1)
+$(info ************ EMSCRIPTEN : FAST_COMPILER = 1 ************)
+
+GLOBAL += EMCC_FAST_COMPILER=1
+else
+$(info ************ EMSCRIPTEN : FAST_COMPILER = 0 ************)
+endif
+
+endif
+
+SOURCES_helloworld		=	HelloWorld.cpp
+SOURCES_info			= 	OpenCLInfo.cpp	
+SOURCES_buffer			=	simple.cpp
+SOURCES_convolution		=	Convolution.cpp
+SOURCES_glinterop		=	GLinterop.cpp
+SOURCES_vectoradd		=	vecadd.cpp
+
+INCLUDES_helloworld		=	-I./
+INCLUDES_info			=	-I./
+INCLUDES_buffer			= 	-I./
+INCLUDES_convolution	=	-I./
+INCLUDES_glinterop		=	-I./ -I$(EMSCRIPTEN_ROOT)/system/include/
+INCLUDES_vectoradd		=	-I./ -I$(EMSCRIPTEN_ROOT)/system/include/
+
+
+ifeq ($(NAT),0)
+
+KERNEL_helloworld		= 	--preload-file HelloWorld.cl
+KERNEL_info				= 	
+KERNEL_buffer			= 	--preload-file simple.cl
+KERNEL_convolution		= 	--preload-file Convolution.cl
+KERNEL_glinterop		= 	--preload-file GLinterop.cl
+KERNEL_vectoradd		= 	
+
+CFLAGS_helloworld		=	
+CFLAGS_info				=	
+CFLAGS_buffer			=	
+CFLAGS_convolution		=	
+CFLAGS_glinterop		=	-s GL_FFP_ONLY=1 -s LEGACY_GL_EMULATION=1
+CFLAGS_vectoradd		=	
+
+VALPARAM_helloworld		=	-s CL_VAL_PARAM='[""]'
+VALPARAM_info			=	-s CL_VAL_PARAM='[""]'
+VALPARAM_buffer			=	-s CL_VAL_PARAM='[""]'
+VALPARAM_convolution	=	-s CL_VAL_PARAM='[""]'
+VALPARAM_glinterop		=	-s CL_VAL_PARAM='[""]'
+VALPARAM_vectoradd		=	-s CL_VAL_PARAM='[""]'
+
+else
+
+COPY_helloworld			= 	cp HelloWorld.cl $(BUILD_FOLDER) &&
+COPY_info				= 	 
+COPY_buffer				= 	cp simple.cl $(BUILD_FOLDER) &&
+COPY_convolution		= 	cp Convolution.cl $(BUILD_FOLDER) &&
+COPY_glinterop			= 	cp GLinterop.cl $(BUILD_FOLDER) &&
+COPY_vectoradd			= 	
+
+endif
+
+.PHONY:    
+	all clean
+
+all: \
+	all_1 all_2 all_3
 
 all_1: \
-	build_lib \
-	hello_world_sample \
-	info_sample \
-
+	helloworld_sample info_sample
 
 all_2: \
-	buffer_sample \
-	convolution_sample \
+	buffer_sample convolution_sample
 
 all_3: \
-	gl_interop_sample \
-	vectoradd_sample \
+	glinterop_sample vectoradd_sample
 
-#   image_filter_sample \
-#	sinewave_sample \
-#	histogram_sample \
-#	dijkstra_sample \
-#	spmv_sample \
-#	flow_sample \
+# Create build folder is necessary))
+mkdir:
+	mkdir -p $(BUILD_FOLDER);
 
-build_freeimage:
-	$(call chdir,$(FREEIMAGE))
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(MAKE) make
+helloworld_sample: mkdir
+	$(call chdir,src/Chapter_2/HelloWorld/)
+	$(COPY_helloworld) 	$(GLOBAL) $(CXX) $(CFLAGS) $(CFLAGS_helloworld)		$(SOURCES_helloworld) 		$(INCLUDES_helloworld)		$(VALPARAM_helloworld) 	$(KERNEL_helloworld) 	-o $(BUILD_FOLDER)$(PREFIX)helloworld$(EXTENSION) 
 
-build_lib:
-	$(call chdir,externs/lib/)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) $(BOOST_SRC) -I../../externs/include/ -o libboost.o	
+info_sample: mkdir
+	$(call chdir,src/Chapter_3/OpenCLInfo/)
+	$(COPY_info) 		$(GLOBAL) $(CXX) $(CFLAGS) $(CFLAGS_info)			$(SOURCES_info)				$(INCLUDES_info)			$(VALPARAM_info) 		$(KERNEL_info) 			-o $(BUILD_FOLDER)$(PREFIX)info$(EXTENSION) 
 
-hello_world_sample:
-	$(call chdir,src/Chapter_2/HelloWorld)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		HelloWorld.cpp \
-	$(MODE) \
-	--preload-file HelloWorld.cl \
-	-o ../../../build/$(PREFIX)book_hello_world.js
+buffer_sample: mkdir
+	$(call chdir,src/Chapter_7/SimpleBufferSubBuffer/)
+	$(COPY_buffer) 		$(GLOBAL) $(CXX) $(CFLAGS) $(CFLAGS_buffer)			$(SOURCES_buffer)			$(INCLUDES_buffer)			$(VALPARAM_buffer) 		$(KERNEL_buffer) 		-o $(BUILD_FOLDER)$(PREFIX)buffer$(EXTENSION) 
 
-info_sample:
-	$(call chdir,src/Chapter_3/OpenCLInfo)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		OpenCLInfo.cpp \
-	$(MODE) \
-	-o ../../../build/$(PREFIX)book_info.js
+convolution_sample: mkdir
+	$(call chdir,src/Chapter_3/OpenCLConvolution/)
+	$(COPY_convolution) $(GLOBAL) $(CXX) $(CFLAGS) $(CFLAGS_convolution)	$(SOURCES_convolution)		$(INCLUDES_convolution)		$(VALPARAM_convolution) $(KERNEL_convolution) 	-o $(BUILD_FOLDER)$(PREFIX)convolution$(EXTENSION) 
 
-convolution_sample:
-	$(call chdir,src/Chapter_3/OpenCLConvolution)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		Convolution.cpp \
-	$(MODE) \
-	--preload-file Convolution.cl \
-	-o ../../../build/$(PREFIX)book_convolution.js
+glinterop_sample: mkdir
+	$(call chdir,src/Chapter_10/GLinterop/)
+	$(COPY_glinterop) 	$(GLOBAL) $(CXX) $(CFLAGS) $(CFLAGS_glinterop)		$(SOURCES_glinterop)		$(INCLUDES_glinterop)		$(VALPARAM_glinterop) 	$(KERNEL_glinterop) 	-o $(BUILD_FOLDER)$(PREFIX)glinterop$(EXTENSION) 
 
-buffer_sample:
-	$(call chdir,src/Chapter_7/SimpleBufferSubBuffer)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		simple.cpp \
-	$(MODE) \
-	--preload-file simple.cl \
-	-o ../../../build/$(PREFIX)book_buffer.js
-
-#not yet working
-image_filter_sample:
-	$(call chdir,src/Chapter_8/ImageFilter2D)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		ImageFilter2D.cpp \
-		../../../externs/lib/libfreeimage-3.15.4.so \
-	-I../../../externs/include/ \
-	$(MODE) -s GL_FFP_ONLY=1 -s LEGACY_GL_EMULATION=1 \
-	--preload-file data/lena.png \
-	--preload-file ImageFilter2D.cl \
-	-o ../../../build/$(PREFIX)book_image_filter.js
-
-gl_interop_sample:
-	$(call chdir,src/Chapter_10/GLinterop)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		GLinterop.cpp \
-	$(MODE) -s GL_FFP_ONLY=1 -s LEGACY_GL_EMULATION=1 \
-	--preload-file GLinterop.cl \
-	-o ../../../build/$(PREFIX)book_gl_interop.js
-
-#not yet working
-sinewave_sample:
-	$(call chdir,src/Chapter_12/Sinewave)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		bmpLoader.cpp \
-		sinewave.cpp \
-	$(MODE) -s TOTAL_MEMORY=1024*1024*50 -s GL_UNSAFE_OPTS=0 -s GL_MAX_TEMP_BUFFER_SIZE=8388608 -s GL_FFP_ONLY=1 -s LEGACY_GL_EMULATION=1 \
-	--preload-file sinewave.cl \
-	--preload-file ATIStream.bmp \
-	-o ../../../build/$(PREFIX)book_sinewave.js
-
-vectoradd_sample:
-	$(call chdir,src/Chapter_12/VectorAdd)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		vecadd.cpp \
-	$(MODE) \
-	-o ../../../build/$(PREFIX)book_vecadd.js
-
-histogram_sample:
-	$(call chdir,src/Chapter_14/histogram)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		histogram.cpp \
-	$(MODE) -s TOTAL_MEMORY=1024*1024*150 \
-	--preload-file histogram_image.cl \
-	-o ../../../build/$(PREFIX)book_histogram.js
-
-dijkstra_sample:
-	$(call chdir,src/Chapter_16/Dijkstra)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		oclDijkstra.cpp \
-		oclDijkstraKernel.cpp \
-		../../../externs/lib/libboost.o \
-	$(MODE) -s TOTAL_MEMORY=1024*1024*150 \
-	-I../../../externs/include/ \
-	--preload-file dijkstra.cl \
-	-o ../../../build/$(PREFIX)book_dijkstra.js
-
-# Use OpenCV :(
-flow_sample:
-	$(call chdir,src/Chapter_19/oclFlow)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		flowGL.cpp \
-		oclFlow.cpp \
-	$(MODE) \
-	--preload-file filters.cl \
-	--preload-file lkflow.cl \
-	--preload-file motion.cl \
-	--preload-file data/minicooper/frame10.png \
-	--preload-file data/minicooper/frame11.png \
-	--preload-file data/minicooper/frame10.pgm \
-	--preload-file data/minicooper/frame11.pgm \
-	-o ../../../build/$(PREFIX)book_flow.js
-
-spmv_sample:
-	$(call chdir,src/Chapter_22/spmv)
-	JAVA_HEAP_SIZE=8096m $(EMCCDEBUG)=1 $(CXX) \
-		matrix_gen.c \
-		spmv.c \
-	$(MODE) \
-	--preload-file spmv.mm \
-	--preload-file spmv.cl \
-	-o ../../../build/$(PREFIX)book_spmv.js
+vectoradd_sample: mkdir
+	$(call chdir,src/Chapter_12/VectorAdd/)
+	$(COPY_vectoradd) 	$(GLOBAL) $(CXX) $(CFLAGS) $(CFLAGS_vectoradd)		$(SOURCES_vectoradd)		$(INCLUDES_vectoradd)		$(VALPARAM_vectoradd) 	$(KERNEL_vectoradd) 	-o $(BUILD_FOLDER)$(PREFIX)vectoradd$(EXTENSION) 
 
 clean:
-	$(call chdir,build/)
-	rm -rf tmp/	
-	mkdir tmp
-	cp memoryprofiler.js tmp/
-	cp settings.js tmp/
-	rm -f *.data
-	rm -f *.js
-	rm -f *.map
-	cp tmp/memoryprofiler.js ./
-	cp tmp/settings.js ./
+	rm -rf bin/
+	mkdir -p bin/
+	mkdir -p tmp/
+	cp build/memoryprofiler.js tmp/ && cp build/settings.js tmp/ && cp build/index.html tmp/
+	rm -rf build/
+	mkdir -p build/
+	cp tmp/memoryprofiler.js build/ && cp tmp/settings.js build/ && cp tmp/index.html build/
 	rm -rf tmp/
-	$(CXX) --clear-cache
+	$(EMSCRIPTEN_ROOT)/emcc --clear-cache
+
 
