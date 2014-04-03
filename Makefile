@@ -23,9 +23,6 @@ endef
 # Current Folder
 CURRENT_ROOT:=$(PWD)
 
-# Current Boost
-CURRENT_BOOST:=$(CURRENT_ROOT)/externs/boost
-
 # Emscripten Folder
 EMSCRIPTEN_ROOT:=$(CURRENT_ROOT)/../webcl-translator/emscripten
 
